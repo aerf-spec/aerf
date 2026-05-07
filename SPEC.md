@@ -173,9 +173,8 @@ The full canonical example used throughout this document:
     "provider_npi": "1234567890"
   },
   "observed_at": "2026-05-06T16:22:33.490443+00:00",
-  "aiuc_controls": ["E015", "D003", "B001"],
+  "compliance_tags": ["aiuc:E015", "aiuc:D003", "aiuc:B001"],
   "key_id": "c348d3c785c92249",
-  "agent_key_id": "",
   "policy_hash": "260eca8ac43ae65e804c7107441acf45500d7f59a275c372d03a9a29985d6bf1",
   "session_id": "8d07720e-337e-4b4c-b92b-b3eccbc8c2e9",
   "session_trajectory": [
@@ -347,12 +346,7 @@ field entirely. Verifiers MUST treat absence of the field as the
 genesis signal. **Presence of the field with `null`, an empty string,
 or any zero value is a conformance error.**
 
-> Implementation note: the v0.1.0-draft.1 reference producer
-> (`agentmint` 0.1.x) emits `previous_receipt_hash: null` for the
-> genesis case. This is non-conformant under C-6 and is scheduled for
-> repair in v0.1.0-draft.2. Until then, the canonical example in
-> this draft is generated as a single genesis receipt that simply
-> omits the field.
+> See open issue #2 for draft.2 producer fixes.
 
 ### 8.2 Linear chain (degenerate case)
 
@@ -385,9 +379,7 @@ signature bytes are excluded from the hash input. This decision allows:
 - Re-signing of receipts with rotated keys without invalidating the
   chain.
 
-> Implementation note: the reference producer at the time of this
-> draft uses payload **plus** signature as the chain hash input. This
-> diverges from C-7 and will be repaired in v0.1.0-draft.2.
+> See open issue #2 for draft.2 producer fixes.
 
 ## 9. Key management
 

@@ -127,8 +127,8 @@ nothing here gets cited as final.
 The reference producer at the time of this draft (`agentmint` 0.1.x)
 diverges from the spec on two locked decisions (genesis sentinel C-6
 and chain hash input C-7). The v0.1.0-draft.1 example is a single
-genesis receipt to sidestep the gap; library fixes are tracked for
-v0.1.0-draft.2.
+genesis receipt to sidestep the gap; library fixes are tracked in
+[issue #2](https://github.com/aerf-spec/aerf/issues/2) for v0.1.0-draft.2.
 
 ## License
 
