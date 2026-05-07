@@ -173,9 +173,8 @@ The full canonical example used throughout this document:
     "provider_npi": "1234567890"
   },
   "observed_at": "2026-05-06T16:22:33.490443+00:00",
-  "aiuc_controls": ["E015", "D003", "B001"],
+  "compliance_tags": ["aiuc:E015", "aiuc:D003", "aiuc:B001"],
   "key_id": "c348d3c785c92249",
-  "agent_key_id": "",
   "policy_hash": "260eca8ac43ae65e804c7107441acf45500d7f59a275c372d03a9a29985d6bf1",
   "session_id": "8d07720e-337e-4b4c-b92b-b3eccbc8c2e9",
   "session_trajectory": [
@@ -347,12 +346,7 @@ field entirely. Verifiers MUST treat absence of the field as the
 genesis signal. **Presence of the field with `null`, an empty string,
 or any zero value is a conformance error.**
 
-> Implementation note: the v0.1.0-draft.1 reference producer
-> (`agentmint` 0.1.x) emits `previous_receipt_hash: null` for the
-> genesis case. This is non-conformant under C-6 and is scheduled for
-> repair in v0.1.0-draft.2. Until then, the canonical example in
-> this draft is generated as a single genesis receipt that simply
-> omits the field.
+> See open issue #2 for draft.2 producer fixes.
 
 ### 8.2 Linear chain (degenerate case)
 
@@ -385,9 +379,7 @@ signature bytes are excluded from the hash input. This decision allows:
 - Re-signing of receipts with rotated keys without invalidating the
   chain.
 
-> Implementation note: the reference producer at the time of this
-> draft uses payload **plus** signature as the chain hash input. This
-> diverges from C-7 and will be repaired in v0.1.0-draft.2.
+> See open issue #2 for draft.2 producer fixes.
 
 ## 9. Key management
 
@@ -554,6 +546,50 @@ for excluding the fields is that *enforcement* is a deployment
 property of the agent runtime, not a property of the receipt itself,
 and conflating the two creates audit ambiguity ("did the policy fire,
 or was the system in shadow mode?").
+
+---
+
+## Appendix B. Non-normative annex on carrier and insurance use cases
+
+This annex describes how AERF's existing primitives — Plan receipts,
+Evidence receipts, the hash chain, and `compliance_tags` — map onto
+common insurance-carrier workflows. **It introduces no new normative
+requirements.** Conformant producers and verifiers need do nothing
+beyond what is specified in §1–§13.
+
+### B.1 Underwriting intake
+
+A Plan receipt defines the authorized scope of an agent — what tools
+it may call, what policies govern it, and what `compliance_tags`
+apply. Carriers can treat a submitted Plan receipt as a
+machine-readable risk profile: the agent's declared permissions, the
+policy hash binding it to a specific ruleset, and the `key_id`
+identifying the signing party. This is independently verifiable
+without relying on the insured's self-reported controls
+documentation.
+
+### B.2 Claims evidence
+
+When a loss event occurs, the hash-chained receipt sequence
+reconstructs exactly what the agent did, in what order, under what
+policy, at what `observed_at` timestamp. The tamper-evident chain
+means no party can retroactively alter the record. A carrier's
+forensic team verifies the chain using only the public key and the
+reference verifier — no AERF software, account, or service required.
+
+### B.3 Coverage conditions
+
+The `compliance_tags` field is the natural mapping point for coverage
+conditions. Carriers can define tag namespaces that map to their
+underwriting criteria alongside standard framework tags such as
+AIUC-1, ISO/IEC 42001, or NIST AI RMF. This allows verification at
+claims time that the agent operated within the declared scope that
+was underwritten, without the spec encoding any single carrier's
+policy terms.
+
+Carriers wishing to define a carrier-specific receipt profile are
+encouraged to open an issue in this repository. The AERF governance
+process will track carrier profile proposals for v0.2.
 
 ---
 
