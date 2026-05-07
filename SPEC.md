@@ -549,4 +549,48 @@ or was the system in shadow mode?").
 
 ---
 
+## Appendix B. Non-normative annex on carrier and insurance use cases
+
+This annex describes how AERF's existing primitives — Plan receipts,
+Evidence receipts, the hash chain, and `compliance_tags` — map onto
+common insurance-carrier workflows. **It introduces no new normative
+requirements.** Conformant producers and verifiers need do nothing
+beyond what is specified in §1–§13.
+
+### B.1 Underwriting intake
+
+A Plan receipt defines the authorized scope of an agent — what tools
+it may call, what policies govern it, and what `compliance_tags`
+apply. Carriers can treat a submitted Plan receipt as a
+machine-readable risk profile: the agent's declared permissions, the
+policy hash binding it to a specific ruleset, and the `key_id`
+identifying the signing party. This is independently verifiable
+without relying on the insured's self-reported controls
+documentation.
+
+### B.2 Claims evidence
+
+When a loss event occurs, the hash-chained receipt sequence
+reconstructs exactly what the agent did, in what order, under what
+policy, at what `observed_at` timestamp. The tamper-evident chain
+means no party can retroactively alter the record. A carrier's
+forensic team verifies the chain using only the public key and the
+reference verifier — no AERF software, account, or service required.
+
+### B.3 Coverage conditions
+
+The `compliance_tags` field is the natural mapping point for coverage
+conditions. Carriers can define tag namespaces that map to their
+underwriting criteria alongside standard framework tags such as
+AIUC-1, ISO/IEC 42001, or NIST AI RMF. This allows verification at
+claims time that the agent operated within the declared scope that
+was underwritten, without the spec encoding any single carrier's
+policy terms.
+
+Carriers wishing to define a carrier-specific receipt profile are
+encouraged to open an issue in this repository. The AERF governance
+process will track carrier profile proposals for v0.2.
+
+---
+
 *End of v0.1.0-draft.1.*

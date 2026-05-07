@@ -130,6 +130,10 @@ and chain hash input C-7). The v0.1.0-draft.1 example is a single
 genesis receipt to sidestep the gap; library fixes are tracked in
 [issue #2](https://github.com/aerf-spec/aerf/issues/2) for v0.1.0-draft.2.
 
+Insurance carriers can use Plan receipts as machine-readable
+underwriting intake and Evidence receipts as tamper-evident claims
+evidence. See Appendix B.
+
 ## License
 
 Dual-licensed:
