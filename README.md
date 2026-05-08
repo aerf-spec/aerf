@@ -2,6 +2,16 @@
 
 **`v0.1.0-draft.1` — Public Review Draft, May 2026. Not yet stable.**
 
+**For reviewers:**
+
+| Goal | Link |
+|---|---|
+| All framework coverage at a glance | [docs/COMPLIANCE.md](docs/COMPLIANCE.md) |
+| AIUC-1 mapping (primary target) | [docs/frameworks/AIUC-1.md](docs/frameworks/AIUC-1.md) |
+| Run the verifier | [§ Try it](#try-it) |
+| Receipt example | [§ Sample receipt](#sample-receipt) |
+| Specification | [SPEC.md](SPEC.md) |
+
 AERF is an open wire format for **cryptographic receipts of AI-agent
 actions**. Each receipt is an Ed25519-signed JSON document that records
 *what* an agent did, *what policy* permitted it, *when* it happened,
@@ -9,6 +19,21 @@ and the *full evidence* of the action. Receipts are independently
 verifiable — no AERF software, account, or service is needed to check
 one. The reference verifier in this repo is a single Go file using only
 the standard library.
+
+AERF addresses the *evidence and logging layer* of AI governance
+frameworks. It supplies tamper-evidence and independent-verifiability
+evidence for controls in
+[AIUC-1](docs/frameworks/AIUC-1.md),
+[HIPAA](docs/frameworks/HIPAA.md),
+[SOC 2](docs/frameworks/SOC2.md),
+[ISO/IEC 42001](docs/frameworks/ISO-42001.md),
+the [EU AI Act](docs/frameworks/EU-AI-ACT.md),
+[NIST AI RMF](docs/frameworks/NIST-AI-RMF.md),
+[SR 11-7](docs/frameworks/SR-11-7.md), and
+[SOX 404](docs/frameworks/SOX-404.md).
+AERF does not replace full compliance programs; see
+[docs/COMPLIANCE.md](docs/COMPLIANCE.md) for the per-control mapping
+and explicit gaps.
 
 This repository is the home of the specification and a reference
 verifier. The reference *producer* lives in
@@ -76,6 +101,9 @@ The tampered file differs from the original by a single field
 ├── CHANGELOG.md
 ├── LICENSE                            Apache 2.0 — code, schemas, examples.
 ├── LICENSE-spec                       CC BY 4.0 — prose / specification text.
+├── docs/
+│   ├── COMPLIANCE.md                  Compliance navigation hub.
+│   └── frameworks/                    Per-framework AERF mapping pages.
 ├── schemas/
 │   └── aerf-v0.1.json                 JSON Schema (Draft 2020-12) for the
 │                                      EVIDENCE receipt shape.
@@ -99,8 +127,19 @@ These are intentionally deferred. They will land in subsequent drafts:
   chain, tamper, replay, malformed, etc.).
 - **Python and TypeScript reference verifiers.** Today, Python is the
   reference *producer*; only the Go verifier ships in this repo.
-- **`compliance/`** — mappings from AERF fields to AIUC-1, NIST AI RMF,
-  EU AI Act, ISO/IEC 42001, etc.
+- **`compliance/`** as a normative directory — superseded by the
+  non-normative
+  [`docs/`](docs/COMPLIANCE.md) framework mapping pages
+  ([AIUC-1](docs/frameworks/AIUC-1.md),
+  [HIPAA](docs/frameworks/HIPAA.md),
+  [SOC 2](docs/frameworks/SOC2.md),
+  [ISO/IEC 42001](docs/frameworks/ISO-42001.md),
+  [EU AI Act](docs/frameworks/EU-AI-ACT.md),
+  [NIST AI RMF](docs/frameworks/NIST-AI-RMF.md),
+  [SR 11-7](docs/frameworks/SR-11-7.md),
+  [SOX 404](docs/frameworks/SOX-404.md)).
+  A normative `compliance/` directory under spec governance (locked
+  decision C-20) remains deferred.
 - **Governance, contributing, and security policy documents.**
 - **CI workflows and pre-built release binaries** of the verifier.
 - **AERF-AUTHZ profile** — the spec acknowledges it as a future
