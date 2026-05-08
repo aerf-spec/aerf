@@ -2,6 +2,16 @@
 
 **`v0.1.0-draft.1` — Public Review Draft, May 2026. Not yet stable.**
 
+**For reviewers:**
+
+| Goal | Link |
+|---|---|
+| All framework coverage at a glance | [docs/COMPLIANCE.md](docs/COMPLIANCE.md) |
+| AIUC-1 mapping (primary target) | [docs/frameworks/AIUC-1.md](docs/frameworks/AIUC-1.md) |
+| Run the verifier | [§ Try it](#try-it) |
+| Receipt example | [§ Sample receipt](#sample-receipt) |
+| Specification | [SPEC.md](SPEC.md) |
+
 AERF is an open wire format for **cryptographic receipts of AI-agent
 actions**. Each receipt is an Ed25519-signed JSON document that records
 *what* an agent did, *what policy* permitted it, *when* it happened,
@@ -10,19 +20,9 @@ verifiable — no AERF software, account, or service is needed to check
 one. The reference verifier in this repo is a single Go file using only
 the standard library.
 
-**Quick navigation for reviewers:**
-
-| Goal | Link |
-|---|---|
-| See all framework coverage | [docs/COMPLIANCE.md](docs/COMPLIANCE.md) |
-| [AIUC-1](docs/frameworks/AIUC-1.md) specifically | [docs/frameworks/AIUC-1.md](docs/frameworks/AIUC-1.md) |
-| Run the verifier | [#try-it](#try-it) |
-| See a receipt example | [#sample-receipt](#sample-receipt) |
-| Review the spec | [SPEC.md](SPEC.md) |
-
-AERF specifically addresses the *evidence and logging layer* of AI
-governance frameworks. It satisfies tamper-evidence and
-independent-verifiability controls across
+AERF addresses the *evidence and logging layer* of AI governance
+frameworks. It supplies tamper-evidence and independent-verifiability
+evidence for controls in
 [AIUC-1](docs/frameworks/AIUC-1.md),
 [HIPAA](docs/frameworks/HIPAA.md),
 [SOC 2](docs/frameworks/SOC2.md),
@@ -31,7 +31,7 @@ the [EU AI Act](docs/frameworks/EU-AI-ACT.md),
 [NIST AI RMF](docs/frameworks/NIST-AI-RMF.md),
 [SR 11-7](docs/frameworks/SR-11-7.md), and
 [SOX 404](docs/frameworks/SOX-404.md).
-It does not replace full compliance programs; see
+AERF does not replace full compliance programs; see
 [docs/COMPLIANCE.md](docs/COMPLIANCE.md) for the per-control mapping
 and explicit gaps.
 
