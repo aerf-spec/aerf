@@ -10,6 +10,31 @@ verifiable — no AERF software, account, or service is needed to check
 one. The reference verifier in this repo is a single Go file using only
 the standard library.
 
+**Quick navigation for reviewers:**
+
+| Goal | Link |
+|---|---|
+| See all framework coverage | [docs/COMPLIANCE.md](docs/COMPLIANCE.md) |
+| [AIUC-1](docs/frameworks/AIUC-1.md) specifically | [docs/frameworks/AIUC-1.md](docs/frameworks/AIUC-1.md) |
+| Run the verifier | [#try-it](#try-it) |
+| See a receipt example | [#sample-receipt](#sample-receipt) |
+| Review the spec | [SPEC.md](SPEC.md) |
+
+AERF specifically addresses the *evidence and logging layer* of AI
+governance frameworks. It satisfies tamper-evidence and
+independent-verifiability controls across
+[AIUC-1](docs/frameworks/AIUC-1.md),
+[HIPAA](docs/frameworks/HIPAA.md),
+[SOC 2](docs/frameworks/SOC2.md),
+[ISO/IEC 42001](docs/frameworks/ISO-42001.md),
+the [EU AI Act](docs/frameworks/EU-AI-ACT.md),
+[NIST AI RMF](docs/frameworks/NIST-AI-RMF.md),
+[SR 11-7](docs/frameworks/SR-11-7.md), and
+[SOX 404](docs/frameworks/SOX-404.md).
+It does not replace full compliance programs; see
+[docs/COMPLIANCE.md](docs/COMPLIANCE.md) for the per-control mapping
+and explicit gaps.
+
 This repository is the home of the specification and a reference
 verifier. The reference *producer* lives in
 [`agentmint-python`](https://github.com/aniketh-maddipati/agentmint-python)
@@ -76,6 +101,9 @@ The tampered file differs from the original by a single field
 ├── CHANGELOG.md
 ├── LICENSE                            Apache 2.0 — code, schemas, examples.
 ├── LICENSE-spec                       CC BY 4.0 — prose / specification text.
+├── docs/
+│   ├── COMPLIANCE.md                  Compliance navigation hub.
+│   └── frameworks/                    Per-framework AERF mapping pages.
 ├── schemas/
 │   └── aerf-v0.1.json                 JSON Schema (Draft 2020-12) for the
 │                                      EVIDENCE receipt shape.
@@ -99,8 +127,19 @@ These are intentionally deferred. They will land in subsequent drafts:
   chain, tamper, replay, malformed, etc.).
 - **Python and TypeScript reference verifiers.** Today, Python is the
   reference *producer*; only the Go verifier ships in this repo.
-- **`compliance/`** — mappings from AERF fields to AIUC-1, NIST AI RMF,
-  EU AI Act, ISO/IEC 42001, etc.
+- **`compliance/`** as a normative directory — superseded by the
+  non-normative
+  [`docs/`](docs/COMPLIANCE.md) framework mapping pages
+  ([AIUC-1](docs/frameworks/AIUC-1.md),
+  [HIPAA](docs/frameworks/HIPAA.md),
+  [SOC 2](docs/frameworks/SOC2.md),
+  [ISO/IEC 42001](docs/frameworks/ISO-42001.md),
+  [EU AI Act](docs/frameworks/EU-AI-ACT.md),
+  [NIST AI RMF](docs/frameworks/NIST-AI-RMF.md),
+  [SR 11-7](docs/frameworks/SR-11-7.md),
+  [SOX 404](docs/frameworks/SOX-404.md)).
+  A normative `compliance/` directory under spec governance (locked
+  decision C-20) remains deferred.
 - **Governance, contributing, and security policy documents.**
 - **CI workflows and pre-built release binaries** of the verifier.
 - **AERF-AUTHZ profile** — the spec acknowledges it as a future
