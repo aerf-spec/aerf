@@ -1,97 +1,185 @@
 # AERF reference verifier — Go
 
-> **Targets AERF v0.1.0-draft.1.** Public review draft, not yet stable.
+> **Targets AERF v0.2.0-draft.1.** Public review draft, not yet stable.
 
-A small (~200 line) Ed25519 signature verifier for AERF-EVIDENCE
-receipts. Standard library only — no third-party Go dependencies.
-Builds to a single static binary.
+Two small Go binaries for AERF-EVIDENCE receipts, standard library
+only:
 
-## What it does today
+- `aerf-verify` — verifies a receipt and prints a one-line result
+  or a JSON report.
+- `aerf-render` — verifies a receipt and produces a self-contained
+  HTML page (no external assets) suitable for embedding in a website
+  or serving directly.
+
+Both share a small `internal/aerf` package with the canonicalization,
+key handling, and verification logic.
+
+## Layout
+
+```
+verifiers/go/
+  go.mod
+  cmd/
+    aerf-verify/      # CLI verifier
+    aerf-render/      # HTML report generator
+  internal/aerf/      # canonical, key, verify
+  example/            # canonical example artifacts
+  scripts/            # verification + render walkthrough scripts
+    test-outputs/     # reference outputs committed for diffing
+```
+
+## What `aerf-verify` checks
 
 - Loads an Ed25519 public key from SPKI PEM (RFC 8410).
-- Reads a receipt JSON file.
-- Strips the `signature` and `timestamp` fields and re-canonicalizes
-  the remaining payload using the same rules as the reference producer
-  (sorted keys, compact separators, ASCII-escaped strings — see
-  [SPEC.md §5.1](../../SPEC.md#51-canonical-json)).
-- Verifies the Ed25519 signature against the canonical bytes.
+- Parses the receipt JSON and re-canonicalizes the payload per
+  [SPEC.md §5.1](../../SPEC.md#51-canonical-json) (RFC 8785 JCS).
+- Verifies the issuer Ed25519 signature.
+- When the relevant flag and key are supplied, additionally verifies
+  `parent_signature` (§4.6, §16), `pdp_signature` over the PDP-bound
+  tuple (§4.6, §17), and `log_inclusion_proof` against an RFC 9162
+  STH (§15).
+- Enforces conditional requirements: a receipt whose `impact_tags`
+  is non-empty MUST carry `parent_signature` and `pdp_signature` and
+  the verifier rejects without them.
 
-## What it does NOT do yet
+What it does **not** do yet: RFC 3161 timestamp verification (§11),
+chain verification across multiple receipts (§8).
 
-The following are described in [SPEC.md](../../SPEC.md) but are
-**not** enforced by this v0.1.0-draft.1 reference verifier:
+## Step-by-step walkthrough
 
-- Hash-chain verification (SPEC §8) — including Merkle root computation
-  and the genesis-sentinel rule (locked decision C-6).
-- RFC 3161 trusted timestamp verification (SPEC §11) — required for
-  the production profile (locked decision C-11).
-- JSON Schema conformance check against `schemas/aerf-v0.1.json`.
+The repository ships a small canonical example under `example/`:
+a genesis receipt, a tampered copy, and the issuer public key. Both
+were produced by the v0.1 reference producer and are preserved
+verbatim under v0.2 as a regression vector.
 
-These will be added in subsequent drafts.
-
-## Quick start
+### 1. Build the binaries
 
 ```bash
-# Run directly (no install)
-go run verify.go example/receipt.json example/public_key.pem
-
-# Or build a static binary
-go build -o aerf-verify verify.go
-./aerf-verify example/receipt.json example/public_key.pem
-
-# Confirm tamper detection
-./aerf-verify example/receipt-tampered.json example/public_key.pem
-# → exit code 1, "FAIL signature verification FAILED ..."
+cd verifiers/go
+go build ./...
 ```
+
+### 2. Verify the good example
+
+```bash
+go run ./cmd/aerf-verify example/receipt.json example/public_key.pem
+```
+
+Expected output:
+
+```
+OK  receipt 7473e179
+    agent:     claims-agent
+    action:    submit:claim:CLM-9920
+    in_policy: true
+    key_id:    c348d3c785c92249
+    parent:    skipped
+    pdp:       skipped
+    log:       skipped
+```
+
+Exit code is `0`.
+
+### 3. Verify the tampered example
+
+```bash
+go run ./cmd/aerf-verify example/receipt-tampered.json example/public_key.pem
+```
+
+Expected output (on stderr):
+
+```
+FAIL issuer_signature issuer signature verification FAILED
+```
+
+Exit code is `1`. The tampered file mutates the `action` field after
+signing; the signature no longer covers the bytes the verifier sees.
+
+### 4. Render an HTML report for a website
+
+```bash
+go run ./cmd/aerf-render \
+  --title "AERF claims-agent receipt" \
+  --output scripts/test-outputs/example.html \
+  example/receipt.json example/public_key.pem
+```
+
+`example.html` is a single self-contained file with inlined CSS and
+no remote assets. Drop it directly into a static site or open it in
+a browser.
+
+### 5. Get a machine-readable JSON report
+
+```bash
+go run ./cmd/aerf-verify --json example/receipt.json example/public_key.pem
+```
+
+The JSON shape mirrors the `Result` struct in `internal/aerf/verify.go`
+(`OK`, `IssuerOK`, `ParentOK`, `PDPOK`, `LogOK`, `HasImpact`,
+`ImpactTags`, `Warnings`, `FailReason`, `FailCategory`, plus a few
+display fields).
+
+### 6. Regenerate reference outputs
+
+Reference outputs live under `scripts/test-outputs/` so reviewers can
+diff against committed text. Regenerate them with:
+
+```bash
+bash scripts/regenerate-test-outputs.sh
+```
+
+## Flags
+
+```
+aerf-verify [flags] <receipt.json> <issuer_key.pem>
+
+  --parent-key PEM       verify parent_signature against this key
+  --pdp-key PEM          verify pdp_signature against this key
+  --log-key PEM          verify log_inclusion_proof against this key
+  --require-parent-sig   fail when the parent check cannot run
+  --require-pdp-sig      fail when the PDP check cannot run
+  --require-log          fail when the log check cannot run
+  --json                 emit a JSON report on stdout
+```
+
+`aerf-render` takes the same flags plus `--title` and `--output`.
 
 ## Exit codes
 
 | Code | Meaning |
 |------|---------|
-| `0`  | Signature valid. |
-| `1`  | Signature invalid, or receipt malformed in a way that prevents verification. |
-| `2`  | Usage error or I/O error (file not found, bad PEM, etc.). |
+| `0`  | All applicable checks passed. |
+| `1`  | A check failed (issuer, parent, PDP, log, chain, timestamp). |
+| `2`  | Usage or I/O error (file missing, bad PEM, etc.). |
+
+Diagnostic output on stderr begins with `FAIL <category> <reason>`
+so consumers can pattern-match on the category.
+
+## Canonicalization
+
+The verifier emits RFC 8785 JCS canonical bytes. For the ASCII content
+in the v0.1 example, the output is byte-identical to Python's
+`json.dumps(..., sort_keys=True, separators=(",", ":"),
+ensure_ascii=True)`, which is what the v0.1 reference producer used.
+v0.2 producers must additionally normalize strings to NFC and encode
+numbers inside hashed `context` objects as JSON strings; both are
+producer obligations described in SPEC.md §5.1.
 
 ## Cross-compilation
 
 ```bash
-GOOS=linux   GOARCH=amd64 go build -o aerf-verify-linux-amd64   verify.go
-GOOS=linux   GOARCH=arm64 go build -o aerf-verify-linux-arm64   verify.go
-GOOS=darwin  GOARCH=amd64 go build -o aerf-verify-darwin-amd64  verify.go
-GOOS=darwin  GOARCH=arm64 go build -o aerf-verify-darwin-arm64  verify.go
-GOOS=windows GOARCH=amd64 go build -o aerf-verify.exe           verify.go
+GOOS=linux   GOARCH=amd64 go build -o aerf-verify  ./cmd/aerf-verify
+GOOS=darwin  GOARCH=arm64 go build -o aerf-verify  ./cmd/aerf-verify
+GOOS=windows GOARCH=amd64 go build -o aerf-verify.exe ./cmd/aerf-verify
 ```
 
-Pre-built release binaries are deferred to v0.1.0-draft.2.
+The same patterns apply to `./cmd/aerf-render`.
 
-## Why Go
+## Dependencies
 
-- **Single static binary distribution.** Auditors download one file
-  and run it. Same playbook as Sigstore `cosign` and SLSA
-  `slsa-verifier`.
-- **Cross-compiles cleanly** to linux / macOS / windows × amd64 /
-  arm64 from one source tree.
-- **Standard library cryptography** (`crypto/ed25519`,
-  `crypto/sha256`, `encoding/json`, `encoding/pem`) covers everything
-  the verifier needs.
-- **Reads in one sitting.** Auditors review the verifier itself,
-  not just its output.
-
-The reference *producer* of AERF receipts is the Python library
-[`agentmint`](https://github.com/aniketh-maddipati/agentmint-python)
-(`pip install agentmint`).
-
-## Canonicalization compatibility
-
-The verifier's canonical JSON output is byte-identical to the
-producer's output of:
-
-```python
-json.dumps(d, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
-```
-
-This is the v0.1.0-draft.1 baseline (held decision C-4). Adoption of
-full RFC 8785 JCS for v0.1.0 stable is under review.
+Standard library only. NFC normalization is a producer obligation
+under SPEC.md §5.1; the verifier intentionally does not pull in
+`golang.org/x/text` so the dependency footprint stays minimal.
 
 ## License
 
