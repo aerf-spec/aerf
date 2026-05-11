@@ -108,6 +108,32 @@ go run ./cmd/aerf-render \
 no remote assets. Drop it directly into a static site or open it in
 a browser.
 
+### Renderer safety posture
+
+`aerf-render` consumes JSON (the receipt, which may be hostile) and
+emits HTML (the report, which may be viewed in a browser). Two
+defensive properties:
+
+- All template substitutions go through Go's `html/template`, which
+  context-aware escapes by default. Receipt field values rendered
+  inside HTML body text are HTML-escaped; values rendered inside HTML
+  attributes are attribute-escaped. The template never interpolates
+  receipt content into `<script>`, `<style>`, or URL contexts.
+- The rendered page contains no external assets: no remote scripts,
+  no remote fonts, no remote images. CSS is inlined inside a single
+  `<style>` block. Reports therefore work offline and do not leak
+  viewer activity to a third party.
+
+The renderer does not validate or sanitize fields beyond what the
+template's auto-escaping provides. If a deployment serves rendered
+reports to untrusted readers, the operator is responsible for any
+further sanitization (for example, a Content Security Policy header)
+appropriate to their environment.
+
+The renderer is a v0.2 convenience tool. It is OUT OF SCOPE for the
+v0.2 conformance surface: a verifier MUST implement `aerf-verify`
+semantics; a renderer is not required.
+
 ### 5. Get a machine-readable JSON report
 
 ```bash
