@@ -1,0 +1,240 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aerf-spec.org/schemas/aerf-v0.2.json",
+  "title": "AERF-EVIDENCE Receipt (v0.2)",
+  "description": "Agent Evidence Receipt Format — EVIDENCE profile, v0.2.0-draft.1. DRAFT — not yet stable. See SPEC.md §4 and §4.6 for the normative description. v0.2 adds multi-agent verification fields (parent_signature, pdp_signature, context_hash_sha256, log_inclusion_proof, impact_tags) and closes held decision C-12.",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "plan_id",
+    "agent",
+    "action",
+    "in_policy",
+    "policy_reason",
+    "evidence_hash_sha512",
+    "evidence",
+    "observed_at",
+    "key_id",
+    "signature"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Receipt identifier (UUIDv4 in v0.2; identifier format under review per held decision C-15).",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "type": {
+      "type": "string",
+      "description": "Receipt profile discriminator. v0.2 ships only 'notarised_evidence'.",
+      "const": "notarised_evidence"
+    },
+    "plan_id": {
+      "type": "string",
+      "description": "UUIDv4 of the plan receipt this evidence references.",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "agent": {
+      "type": "string",
+      "description": "Asserted identity of the acting agent.",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "action": {
+      "type": "string",
+      "description": "Action being notarised. Charset: A-Z a-z 0-9 _ : . -",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9_:.\\-]+$"
+    },
+    "in_policy": {
+      "type": "boolean",
+      "description": "Whether the action satisfied the plan's policy at observation time."
+    },
+    "policy_reason": {
+      "type": "string",
+      "description": "Human-readable explanation of the policy decision."
+    },
+    "evidence_hash_sha512": {
+      "type": "string",
+      "description": "SHA-512 hex digest of the canonical JSON encoding of the 'evidence' object. Algorithm declared via field-name suffix per locked decision C-3.",
+      "pattern": "^[0-9a-f]{128}$"
+    },
+    "evidence": {
+      "type": "object",
+      "description": "Inline evidence payload (held decision C-8)."
+    },
+    "observed_at": {
+      "type": "string",
+      "description": "ISO 8601 timestamp when the action was observed.",
+      "format": "date-time"
+    },
+    "key_id": {
+      "type": "string",
+      "description": "Identifier of the issuer's public key. v0.2 uses the first 16 hex chars of SHA-256(public_key).",
+      "pattern": "^[0-9a-f]{16}$"
+    },
+    "signature": {
+      "type": "string",
+      "description": "Ed25519 signature over the canonical JSON of the receipt with post-issuance fields removed (see SPEC.md §7).",
+      "pattern": "^[0-9a-f]{128}$"
+    },
+    "previous_receipt_hash": {
+      "type": "string",
+      "description": "SHA-256 hex digest of the canonical PAYLOAD of the previous receipt per locked decisions C-7 and C-24.",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "plan_signature": {
+      "type": "string",
+      "description": "Hex-encoded Ed25519 signature of the referenced plan receipt."
+    },
+    "agent_signature": {
+      "type": "string",
+      "description": "Optional signature by the acting agent's own key. Distinct from parent_signature."
+    },
+    "agent_key_id": {
+      "type": "string",
+      "description": "Key ID of the agent's signing key, when agent_signature is present."
+    },
+    "policy_hash": {
+      "type": "string",
+      "description": "SHA-256 hex digest of canonical {scope, checkpoints, delegates_to} of the plan. REQUIRED when pdp_signature is present.",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "output_hash": {
+      "type": "string",
+      "description": "SHA-256 hex digest of canonical action output, when supplied.",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "session_id": {
+      "type": "string",
+      "description": "Issuer-scoped session identifier."
+    },
+    "session_trajectory": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "session_escalation": {
+      "type": ["string", "null"]
+    },
+    "reasoning_hash": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "aiuc_controls": {
+      "type": "array",
+      "description": "DEPRECATED — superseded by 'compliance_tags'.",
+      "items": { "type": "string" }
+    },
+    "compliance_tags": {
+      "type": "array",
+      "description": "Generic compliance tags (locked decision C-14). Distinct from impact_tags.",
+      "items": { "type": "string" }
+    },
+    "timestamp": {
+      "type": "object",
+      "description": "RFC 3161 timestamp token information."
+    },
+    "parent_signature": {
+      "type": "string",
+      "description": "Hex-encoded Ed25519 counter-signature by the parent agent (SPEC.md §4.6, §16).",
+      "pattern": "^[0-9a-f]{128}$"
+    },
+    "parent_key_id": {
+      "type": "string",
+      "description": "First 16 lowercase hex chars of SHA-256(parent public key).",
+      "pattern": "^[0-9a-f]{16}$"
+    },
+    "parent_evaluation_path_id": {
+      "type": "string",
+      "description": "OPTIONAL declaration of the parent's evaluation path identity (SPEC.md §12.6).",
+      "maxLength": 128
+    },
+    "pdp_signature": {
+      "type": "string",
+      "description": "Hex-encoded Ed25519 signature by the Policy Decision Point over the canonical JSON of {context_hash_sha256, in_policy, policy_hash} (SPEC.md §4.6, §17).",
+      "pattern": "^[0-9a-f]{128}$"
+    },
+    "pdp_key_id": {
+      "type": "string",
+      "description": "First 16 lowercase hex chars of SHA-256(PDP public key).",
+      "pattern": "^[0-9a-f]{16}$"
+    },
+    "context_hash_sha256": {
+      "type": "string",
+      "description": "SHA-256 hex digest of the canonical JSON of the input context observed by the agent.",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "log_inclusion_proof": {
+      "type": "object",
+      "description": "RFC 9162-aligned audit-path inclusion proof against a conformant transparency log (SPEC.md §15). Added post-issuance.",
+      "required": [
+        "log_id",
+        "leaf_hash",
+        "tree_size",
+        "audit_path",
+        "sth",
+        "sth_signature"
+      ],
+      "properties": {
+        "log_id": { "type": "string", "minLength": 1 },
+        "leaf_hash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "tree_size": { "type": "integer", "minimum": 1 },
+        "audit_path": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+        },
+        "sth": {
+          "type": "object",
+          "required": ["tree_size", "root_hash", "timestamp"],
+          "properties": {
+            "tree_size": { "type": "integer", "minimum": 1 },
+            "root_hash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+            "timestamp": { "type": "string", "format": "date-time" }
+          },
+          "additionalProperties": false
+        },
+        "sth_signature": { "type": "string", "pattern": "^[0-9a-f]{128}$" }
+      },
+      "additionalProperties": false
+    },
+    "impact_tags": {
+      "type": "array",
+      "description": "Impact tags from the closed v0.2 core registry or the x-{vendor}- namespace (SPEC.md §17).",
+      "items": {
+        "type": "string",
+        "pattern": "^(HIPAA-PHI-WRITE|HIPAA-PHI-DELETE|FINANCE-TRADE-EXEC|FINANCE-DISBURSEMENT|AGENT-AGENT-DELEGATION|AGENT-EXTERNAL-CALL|x-[a-z0-9]+-[A-Za-z0-9_:-]+)$"
+      },
+      "uniqueItems": true
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "impact_tags": { "type": "array", "minItems": 1 }
+        },
+        "required": ["impact_tags"]
+      },
+      "then": {
+        "required": [
+          "parent_signature",
+          "parent_key_id",
+          "pdp_signature",
+          "pdp_key_id",
+          "context_hash_sha256",
+          "policy_hash"
+        ]
+      }
+    },
+    {
+      "if": { "required": ["parent_signature"] },
+      "then": { "required": ["parent_key_id"] }
+    },
+    {
+      "if": { "required": ["pdp_signature"] },
+      "then": { "required": ["pdp_key_id", "context_hash_sha256", "policy_hash"] }
+    }
+  ]
+}
