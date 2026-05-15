@@ -24,3 +24,11 @@ target
 scratch/
 aerf-verify
 verifiers/go/aerf-verify
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+*.egg-info/
+build/

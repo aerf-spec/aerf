@@ -1,0 +1,8 @@
+OK  receipt 7473e179
+    agent:     claims-agent
+    action:    submit:claim:CLM-9920
+    in_policy: true
+    key_id:    c348d3c785c92249
+    parent:    skipped
+    pdp:       skipped
+    log:       skipped

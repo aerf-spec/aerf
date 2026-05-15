@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AERF claims-agent receipt</title>
+<style>
+  :root {
+    --ok: #1f7a3a;
+    --fail: #b3261e;
+    --skip: #6b6b6b;
+    --bg: #fafafa;
+    --card: #ffffff;
+    --line: #e3e3e3;
+    --text: #1a1a1a;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  body {
+    margin: 0;
+    padding: 2rem 1rem;
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { margin: 0 0 .25rem; font-size: 1.4rem; }
+  .meta { color: #555; font-size: .85rem; margin-bottom: 1.5rem; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .badge {
+    display: inline-block;
+    padding: .15rem .6rem;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: .8rem;
+    letter-spacing: .04em;
+  }
+  .badge.ok   { background: #e6f4ea; color: var(--ok); }
+  .badge.fail { background: #fce8e6; color: var(--fail); }
+  .badge.skip { background: #f0f0f0; color: var(--skip); }
+  dl { margin: .75rem 0 0; display: grid; grid-template-columns: 9.5rem 1fr; gap: .4rem 1rem; }
+  dt { color: #555; font-size: .85rem; }
+  dd { margin: 0; font-family: var(--mono); font-size: .9rem; word-break: break-all; }
+  .checks li { display: flex; justify-content: space-between; padding: .5rem 0; border-top: 1px solid var(--line); }
+  .checks li:first-child { border-top: 0; }
+  .checks ul { padding: 0; list-style: none; }
+  .err {
+    background: #fff5f4;
+    border-left: 3px solid var(--fail);
+    padding: .75rem 1rem;
+    font-family: var(--mono);
+    font-size: .85rem;
+    margin: 0;
+    white-space: pre-wrap;
+  }
+  footer { color: #888; font-size: .8rem; text-align: center; margin-top: 2rem; }
+  a { color: inherit; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>AERF claims-agent receipt</h1>
+  <div class="meta">Verified at 2026-05-11T19:20:02Z by aerf-render (AERF v0.2.0-draft.1)</div>
+
+  <div class="card">
+    <span class="badge ok">VERIFIED</span>
+  </div>
+
+  <div class="card">
+    <dl>
+      <dt>Receipt ID</dt><dd>7473e179-001c-4d3b-94bc-d0f53dd6eec6</dd>
+      <dt>Agent</dt><dd>claims-agent</dd>
+      <dt>Action</dt><dd>submit:claim:CLM-9920</dd>
+      <dt>In policy</dt><dd>true</dd>
+      <dt>Issuer key ID</dt><dd>c348d3c785c92249</dd>
+    </dl>
+  </div>
+
+  <div class="card checks">
+    <h2 style="margin:0 0 .5rem; font-size:1rem;">Checks</h2>
+    <ul>
+      <li><span>Issuer signature</span><span class="badge ok">passed</span></li>
+      <li><span>Parent counter-signature</span><span class="badge skip">skipped</span></li>
+      <li><span>PDP signature</span><span class="badge skip">skipped</span></li>
+      <li><span>Log inclusion proof</span><span class="badge skip">skipped</span></li>
+    </ul>
+  </div>
+
+  <footer>
+    aerf-render &middot; <a href="https://github.com/aerf-spec/aerf">github.com/aerf-spec/aerf</a>
+  </footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,45 @@
+name: verify
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+          cache: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install jsonschema cryptography
+
+      - name: Build Go verifier and renderer
+        run: make build
+
+      - name: Run conformance vectors
+        run: make verify-vectors
+
+      - name: Schema check
+        run: make schema-check
+
+      - name: Run adversary suite
+        run: make adversary
+
+      - name: Upload adversary report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: adversary-report
+          path: build/adversary-report.json
